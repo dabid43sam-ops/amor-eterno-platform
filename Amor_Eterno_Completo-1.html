@@ -1,0 +1,154 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Amor Eterno</title>
+<style>
+body{margin:0;background:#111;color:#f5f1e8;font-family:Georgia,serif}
+header{height:100vh;display:flex;justify-content:center;align-items:center;text-align:center;
+background:linear-gradient(rgba(0,0,0,.55),rgba(0,0,0,.7),rgba(0,0,0,.8));}
+h1{font-size:4rem;color:#d4af37;margin:0}
+h2{color:#d4af37}
+section{padding:60px 10%}
+.btn{display:inline-block;padding:12px 24px;border:1px solid #d4af37;color:#d4af37;text-decoration:none;margin:5px}
+.cards{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:20px}
+.card{background:#1c1c1c;padding:20px;border-radius:12px}
+input,button{padding:10px;margin:5px;width:100%;max-width:350px}
+button{cursor:pointer}
+footer{text-align:center;padding:30px;background:#181818}
+</style>
+</head>
+<body>
+
+<header>
+<div>
+<h1>AMOR ETERNO</h1>
+<p>La esencia de México, servida con elegancia.</p>
+<a href="#menu" class="btn">Ver Menú</a>
+<a href="#reservas" class="btn">Reservar</a>
+</div>
+</header>
+
+<section>
+<h2>Nuestra Historia</h2>
+<p>
+Amor Eterno es un homenaje a las raíces mexicanas, fusionando tradición,
+gastronomía y elegancia en una experiencia inolvidable.
+</p>
+</section>
+
+<section id="menu">
+<h2>Menú Destacado</h2>
+<div class="cards">
+<div class="card">
+<h3>Entradas</h3>
+<p>Tlacoyos de maíz azul, esquites ancestrales.</p>
+</div>
+<div class="card">
+<h3>Especialidades</h3>
+<p>Mole tradicional, cochinita pibil, costilla al mezcal.</p>
+</div>
+<div class="card">
+<h3>Bebidas</h3>
+<p>Mezcal artesanal, tequila premium y mixología de autor.</p>
+</div>
+</div>
+</section>
+
+<section>
+<h2>Cultura y Tradición</h2>
+<p>
+Inspirado en la riqueza cultural mexicana y la dualidad representada por
+Mictlantecuhtli y Mictecacíhuatl.
+</p>
+</section>
+
+<section id="reservas">
+<h2>Reservaciones</h2>
+
+<h3>Nueva reservación</h3>
+<input id="nombre" placeholder="Nombre completo">
+<input id="fecha" type="date">
+<input id="personas" type="number" min="1" placeholder="Número de personas">
+<button onclick="reservar()">Reservar mesa</button>
+<p id="estado"></p>
+
+<h3>Modificar reservación</h3>
+<input id="codigo" placeholder="Código de reservación">
+<input id="nuevaFecha" type="date">
+<button onclick="modificar()">Modificar reservación</button>
+<p id="modEstado"></p>
+
+<h3>Fechas ocupadas</h3>
+<p id="ocupadas"></p>
+<p><strong>Importante:</strong> Todos los lunes el restaurante permanece cerrado.</p>
+</section>
+
+<footer>
+<p>© Amor Eterno | Tradición Mexicana</p>
+</footer>
+
+<script>
+const ocupadas=["2026-06-10","2026-06-15","2026-06-20"];
+document.getElementById("ocupadas").innerText=ocupadas.join(", ");
+
+function validarFecha(fecha){
+ const d=new Date(fecha+"T12:00:00");
+ if(d.getDay()===1){return {ok:false,msg:"Los lunes no abrimos."};}
+ if(ocupadas.includes(fecha)){return {ok:false,msg:"Fecha ocupada."};}
+ return {ok:true,msg:"Disponible"};
+}
+
+function reservar(){
+ let nombre=document.getElementById("nombre").value;
+ let fecha=document.getElementById("fecha").value;
+
+ if(!nombre||!fecha){
+   estado.innerText="Completa todos los campos.";
+   return;
+ }
+
+ let r=validarFecha(fecha);
+ if(!r.ok){
+   estado.innerText=r.msg;
+   return;
+ }
+
+ let codigo="AE-"+Math.floor(Math.random()*100000);
+ localStorage.setItem(codigo,JSON.stringify({nombre,fecha}));
+ ocupadas.push(fecha);
+
+ estado.innerHTML="Reservación confirmada. Código: <b>"+codigo+"</b>";
+ document.getElementById("ocupadas").innerText=ocupadas.join(", ");
+}
+
+function modificar(){
+ let codigo=document.getElementById("codigo").value;
+ let fecha=document.getElementById("nuevaFecha").value;
+
+ let reserva=localStorage.getItem(codigo);
+ if(!reserva){
+   modEstado.innerText="Código no encontrado.";
+   return;
+ }
+
+ let r=validarFecha(fecha);
+ if(!r.ok){
+   modEstado.innerText=r.msg;
+   return;
+ }
+
+ let datos=JSON.parse(reserva);
+ localStorage.setItem(codigo,JSON.stringify({
+   nombre:datos.nombre,
+   fecha:fecha
+ }));
+
+ modEstado.innerText="Reservación modificada correctamente.";
+}
+</script>
+
+</body>
+</html>
