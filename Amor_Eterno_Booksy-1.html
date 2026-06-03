@@ -1,0 +1,148 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Amor Eterno | Reservaciones</title>
+<style>
+body{margin:0;background:#0d0d0d;color:#fff;font-family:system-ui,sans-serif}
+.header{padding:24px;background:#151515;border-bottom:1px solid #333}
+.brand{color:#d4af37;font-size:32px;font-weight:700}
+.container{max-width:1100px;margin:auto;padding:20px}
+.grid{display:grid;grid-template-columns:1.2fr .8fr;gap:20px}
+.card{background:#1a1a1a;border-radius:18px;padding:20px;box-shadow:0 0 20px rgba(0,0,0,.3)}
+h2{color:#d4af37}
+.calendar{display:grid;grid-template-columns:repeat(7,1fr);gap:8px}
+.day{padding:12px;border-radius:12px;text-align:center;background:#262626;cursor:pointer}
+.available{border:1px solid #2e7d32}
+.busy{background:#5a1f1f;cursor:not-allowed}
+.closed{background:#5a4a1f;cursor:not-allowed}
+.selected{outline:3px solid #d4af37}
+.slot{padding:10px;margin:6px 0;background:#262626;border-radius:10px;cursor:pointer}
+input,select,button{width:100%;padding:12px;margin-top:10px;border-radius:10px;border:none}
+button{background:#d4af37;color:#111;font-weight:bold}
+.small{opacity:.8}
+</style>
+</head>
+<body>
+<div class="header">
+<div class="brand">AMOR ETERNO</div>
+<div>Reservaciones estilo Booksy</div>
+</div>
+
+<div class="container">
+<div class="grid">
+
+<div class="card">
+<h2>Selecciona una fecha</h2>
+<div id="calendar" class="calendar"></div>
+<p class="small">🟢 Disponible | 🔴 Ocupado | 🟡 Cerrado (lunes)</p>
+</div>
+
+<div class="card">
+<h2>Reservar mesa</h2>
+<input id="nombre" placeholder="Nombre">
+<select id="personas">
+<option>2 personas</option>
+<option>4 personas</option>
+<option>6 personas</option>
+<option>8 personas</option>
+</select>
+
+<h3>Horario</h3>
+<div id="slots"></div>
+
+<button onclick="reservar()">Confirmar reservación</button>
+<p id="msg"></p>
+
+<hr>
+<h3>Modificar reservación</h3>
+<input id="codigo" placeholder="Código AE-12345">
+<input id="nuevaFecha" type="date">
+<button onclick="modificar()">Modificar</button>
+<p id="mod"></p>
+</div>
+
+</div>
+</div>
+
+<script>
+const ocupadas=["2026-06-10","2026-06-15","2026-06-20"];
+let fechaSeleccionada="";
+let horaSeleccionada="";
+
+const horarios=["13:00","14:00","15:00","17:00","18:00","19:00","20:00"];
+
+function renderCalendar(){
+ const cal=document.getElementById("calendar");
+ const base=new Date();
+ for(let i=0;i<30;i++){
+   let d=new Date();
+   d.setDate(base.getDate()+i);
+
+   const iso=d.toISOString().split("T")[0];
+   const el=document.createElement("div");
+   el.className="day";
+
+   if(d.getDay()===1){
+      el.classList.add("closed");
+   }else if(ocupadas.includes(iso)){
+      el.classList.add("busy");
+   }else{
+      el.classList.add("available");
+      el.onclick=()=>{
+         document.querySelectorAll(".day").forEach(x=>x.classList.remove("selected"));
+         el.classList.add("selected");
+         fechaSeleccionada=iso;
+      };
+   }
+
+   el.innerHTML=d.getDate();
+   cal.appendChild(el);
+ }
+}
+
+function renderSlots(){
+ const c=document.getElementById("slots");
+ horarios.forEach(h=>{
+   const div=document.createElement("div");
+   div.className="slot";
+   div.innerText=h;
+   div.onclick=()=>{
+      document.querySelectorAll(".slot").forEach(x=>x.style.border="none");
+      div.style.border="2px solid #d4af37";
+      horaSeleccionada=h;
+   };
+   c.appendChild(div);
+ });
+}
+
+function reservar(){
+ if(!fechaSeleccionada || !horaSeleccionada){
+   msg.innerText="Selecciona fecha y horario.";
+   return;
+ }
+ const codigo="AE-"+Math.floor(Math.random()*100000);
+ localStorage.setItem(codigo,JSON.stringify({
+   nombre:nombre.value,
+   fecha:fechaSeleccionada,
+   hora:horaSeleccionada
+ }));
+ msg.innerHTML="Reserva confirmada. Código: <b>"+codigo+"</b>";
+}
+
+function modificar(){
+ const r=localStorage.getItem(codigo.value);
+ if(!r){mod.innerText="Código no encontrado";return;}
+ const data=JSON.parse(r);
+ data.fecha=nuevaFecha.value;
+ localStorage.setItem(codigo.value,JSON.stringify(data));
+ mod.innerText="Reservación actualizada";
+}
+
+renderCalendar();
+renderSlots();
+</script>
+</body>
+</html>
